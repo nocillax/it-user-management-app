@@ -34,6 +34,16 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
+// Root route - welcome page
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "IT User Management API is running",
+    documentation: "/api/v1",
+    healthCheck: "/health"
+  });
+});
+
 // Mount API routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
