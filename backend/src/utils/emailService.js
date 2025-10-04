@@ -39,7 +39,7 @@ const sendVerificationEmail = async (email, name, token) => {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Email Verification - THE APP</title>
+            <title>Email Verification - NX IT-UMS</title>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f8fafc; }
                 .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -52,7 +52,7 @@ const sendVerificationEmail = async (email, name, token) => {
         <body>
             <div class="container">
                 <div class="header">
-                    <h1 style="margin: 0; font-size: 28px;">THE APP</h1>
+                    <h1 style="margin: 0; font-size: 28px;">NX IT-UMS</h1>
                     <p style="margin: 10px 0 0 0; opacity: 0.9;">Welcome to our platform!</p>
                 </div>
                 
@@ -61,7 +61,7 @@ const sendVerificationEmail = async (email, name, token) => {
                     
                     <p>Hello <strong>${name}</strong>,</p>
                     
-                    <p>Thank you for registering with THE APP! To complete your registration and activate your account, please verify your email address by clicking the button below:</p>
+                    <p>Thank you for registering with NX IT-UMS! To complete your registration and activate your account, please verify your email address by clicking the button below:</p>
                     
                     <div style="text-align: center; margin: 30px 0;">
                         <a href="${verificationUrl}" class="button">Verify Email Address</a>
@@ -76,7 +76,7 @@ const sendVerificationEmail = async (email, name, token) => {
                     
                     <p>If you didn't create an account with us, you can safely ignore this email.</p>
                     
-                    <p>Best regards,<br>The THE APP Team</p>
+                    <p>Best regards,<br>The NX IT-UMS Team</p>
                 </div>
                 
                 <div class="footer">
@@ -89,27 +89,25 @@ const sendVerificationEmail = async (email, name, token) => {
 
     // Text version for email clients that don't support HTML
     const textContent = `
-        Welcome to THE APP!
-        
-        Hello ${name},
-        
-        Thank you for registering with THE APP! To complete your registration and activate your account, please verify your email address by visiting this link:
-        
-        ${verificationUrl}
+        Welcome to NX IT-UMS!
+
+        Hi ${name},
+
+        Thank you for registering with NX IT-UMS! To complete your registration and activate your account, please verify your email address by visiting this link:        ${verificationUrl}
         
         This verification link will expire in 24 hours for security reasons.
         
         If you didn't create an account with us, you can safely ignore this email.
         
         Best regards,
-        The THE APP Team
+        The NX IT-UMS Team
         `;
 
     // Send email
     const mailOptions = {
-      from: process.env.EMAIL_FROM || `"THE APP" <${process.env.EMAIL_USER}>`,
+      from: process.env.EMAIL_FROM || `"NX IT-UMS" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Verify Your Email Address - THE APP",
+      subject: "Verify Your Email Address - NX IT-UMS",
       text: textContent,
       html: htmlContent,
     };

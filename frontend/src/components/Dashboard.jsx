@@ -253,11 +253,9 @@ const Dashboard = ({ onLogout }) => {
           <div className="flex justify-between items-center h-16">
             {/* Logo and title */}
             <div className="flex items-center">
-              <div className="text-xl font-bold text-primary-600 mr-8">
-                THE APP
-              </div>
+              <div className="text-xl font-bold text-primary-600 mr-8">NX</div>
               <h1 className="text-lg font-semibold text-gray-800">
-                User Management
+                IT-UMS Dashboard
               </h1>
             </div>
 
@@ -271,11 +269,10 @@ const Dashboard = ({ onLogout }) => {
                   authAPI.logout();
                   onLogout();
                 }}
-                className="flex items-center space-x-1 text-gray-500 hover:text-gray-700"
+                className="flex items-center text-red-500 hover:text-red-700"
                 title="Logout"
               >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:block">Logout</span>
+                <LogOut className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -293,7 +290,7 @@ const Dashboard = ({ onLogout }) => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
-              <option value="all">All Statuses</option>
+              <option value="all">Filter</option>
               <option value="active">Active</option>
               <option value="unverified">Unverified</option>
               <option value="blocked">Blocked</option>
@@ -313,7 +310,7 @@ const Dashboard = ({ onLogout }) => {
           <button
             onClick={loadUsers}
             disabled={isLoading}
-            className="btn-secondary flex items-center space-x-2"
+            className="btn-secondary flex items-center space-x-2 text-sm"
           >
             <RefreshCw
               className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
@@ -324,47 +321,49 @@ const Dashboard = ({ onLogout }) => {
 
         {/* Toolbar */}
         <div className="mb-6 bg-white border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700 mr-3">
-              Actions ({selectedUsers.size} selected):
-            </span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleBulkAction("block")}
+                disabled={selectedUsers.size === 0 || isLoading}
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Block selected users"
+              >
+                <Lock className="h-4 w-4" />
+                <span>Block</span>
+              </button>
 
-            <button
-              onClick={() => handleBulkAction("block")}
-              disabled={selectedUsers.size === 0 || isLoading}
-              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Block selected users"
-            >
-              <Lock className="h-4 w-4" />
-              <span>Block</span>
-            </button>
+              <button
+                onClick={() => handleBulkAction("unblock")}
+                disabled={selectedUsers.size === 0 || isLoading}
+                className="inline-flex items-center justify-center w-9 h-9 text-blue-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Unblock selected users"
+              >
+                <Unlock className="h-4 w-4" />
+              </button>
 
-            <button
-              onClick={() => handleBulkAction("unblock")}
-              disabled={selectedUsers.size === 0 || isLoading}
-              className="inline-flex items-center justify-center w-9 h-9 text-blue-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Unblock selected users"
-            >
-              <Unlock className="h-4 w-4" />
-            </button>
+              <button
+                onClick={() => handleBulkAction("delete")}
+                disabled={selectedUsers.size === 0 || isLoading}
+                className="inline-flex items-center justify-center w-9 h-9 text-red-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-red-50 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Delete selected users"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
 
-            <button
-              onClick={() => handleBulkAction("delete")}
-              disabled={selectedUsers.size === 0 || isLoading}
-              className="inline-flex items-center justify-center w-9 h-9 text-red-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-red-50 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Delete selected users"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+              <button
+                onClick={handleDeleteUnverified}
+                disabled={isLoading}
+                className="inline-flex items-center justify-center w-9 h-9 text-orange-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-orange-50 hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Delete all unverified users"
+              >
+                <Eraser className="h-4 w-4" />
+              </button>
+            </div>
 
-            <button
-              onClick={handleDeleteUnverified}
-              disabled={isLoading}
-              className="inline-flex items-center justify-center w-9 h-9 text-orange-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-orange-50 hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Delete all unverified users"
-            >
-              <Eraser className="h-4 w-4" />
-            </button>
+            <div className="text-sm font-medium text-gray-500">
+              {selectedUsers.size} selected
+            </div>
           </div>
         </div>
 

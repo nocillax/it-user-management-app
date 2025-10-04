@@ -96,12 +96,12 @@ const Register = () => {
           {/* Logo and Header */}
           <div className="text-center mb-8">
             <div className="text-2xl font-bold text-primary-600 mb-2">
-              THE APP
+              NX IT-UMS
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Create your account
             </h2>
-            <p className="text-gray-600 text-sm">Join The App today</p>
+            <p className="text-gray-600 text-sm">Join NX IT-UMS Team today</p>
           </div>
 
           {/* Registration Form */}

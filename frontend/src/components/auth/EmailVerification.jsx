@@ -37,7 +37,7 @@ const EmailVerification = () => {
         <div className="text-center">
           {/* Logo */}
           <div className="text-2xl font-bold text-primary-600 mb-8">
-            THE APP
+            NX IT-UMS
           </div>
 
           {/* Status Icon and Content */}
