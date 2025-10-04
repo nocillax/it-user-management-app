@@ -1,15 +1,9 @@
-/**
- * IT User Management System - Main Server File
- * Important: This is the entry point for the Express application
- */
-
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const { testConnection } = require("./config/database");
 
 // Load environment variables
-// Note: Must happen before accessing any env variables
 dotenv.config();
 
 // Initialize express app
@@ -17,7 +11,6 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware setup
-// Important: Order matters for middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -33,7 +26,6 @@ const userRoutes = require("./routes/users");
 
 // Middleware for request logging
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url} [${new Date().toISOString()}]`);
   next();
 });
 
@@ -43,12 +35,10 @@ app.get("/health", (req, res) => {
 });
 
 // Mount API routes
-// Nota bene: Use versioning for API stability
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 
 // Error handling middleware
-// Important: Must be defined after routes
 app.use((err, req, res, next) => {
   console.error("Server error:", err.stack);
   res.status(err.status || 500).json({
@@ -66,9 +56,6 @@ app.use((req, res) => {
   });
 });
 
-/**
- * Start the server and connect to database
- */
 const startServer = async () => {
   try {
     // Test database connection

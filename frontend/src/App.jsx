@@ -1,8 +1,3 @@
-/**
- * Main App Component with Routing
- * Important: This is the root component that handles authentication and routing
- */
-
 import {
   BrowserRouter as Router,
   Routes,
@@ -12,7 +7,6 @@ import {
 import { useState, useEffect } from "react";
 import { apiUtils } from "./utils/api";
 
-// Import components
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import Dashboard from "./components/Dashboard";
@@ -22,10 +16,6 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  /**
-   * Check authentication status on app load
-   * Nota bene: This ensures proper authentication state management
-   */
   useEffect(() => {
     const checkAuth = () => {
       const authenticated = apiUtils.isAuthenticated();
@@ -36,10 +26,6 @@ function App() {
     checkAuth();
   }, []);
 
-  /**
-   * Protected Route Component
-   * Important: Wraps components that require authentication
-   */
   const ProtectedRoute = ({ children }) => {
     if (isLoading) {
       return (
@@ -52,10 +38,6 @@ function App() {
     return isAuthenticated ? children : <Navigate to="/login" replace />;
   };
 
-  /**
-   * Public Route Component
-   * Note: Redirects authenticated users away from auth pages
-   */
   const PublicRoute = ({ children }) => {
     if (isLoading) {
       return (

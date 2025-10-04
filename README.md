@@ -1,135 +1,307 @@
 # IT User Management System
 
-A comprehensive user management system built with the PERN stack (PostgreSQL, Express.js, React, Node.js) and TailwindCSS.
+A full-stack user management application built with the PERN stack for managing user authentication, registration, and administrative tasks.
 
-## 🔧 Tech Stack
+## 🚀 Live Demo
 
-- **Backend**: Node.js + Express.js
-- **Frontend**: React (Vite) + TailwindCSS
-- **Database**: PostgreSQL
-- **Authentication**: JWT-based
-- **Email**: Nodemailer (Gmail SMTP)
+- **Frontend**: [Deploy on Vercel](https://vercel.com)
+- **Backend**: [Deploy on Render](https://render.com)
 
-## 📋 Features
+## 📦 Quick Deploy Guide
 
-- User registration with email verification
-- JWT-based authentication
-- User management dashboard with:
-  - Sortable user table
-  - Bulk operations (block, unblock, delete)
-  - User status management
-  - Responsive design
-- Email verification system
-- Professional, clean UI design
+### Option 1: Render + Vercel (Recommended)
 
-## 🚀 Quick Start
+1. **Backend on Render**: Deploy Node.js + PostgreSQL
+2. **Frontend on Vercel**: Deploy React app
+
+### Option 2: Alternative Free Hosts
+
+- **Railway** (Full-stack)
+- **Netlify** (Frontend) + **Render** (Backend)
+- **Heroku** (Full-stack - requires credit card)
+
+See deployment instructions below ⬇️
+
+## Features
+
+- **User Authentication**: Registration, login, email verification, and JWT-based sessions
+- **User Management**: View, block, unblock, and delete users with bulk operations
+- **Admin Dashboard**: Professional interface with sortable tables, filtering, and search
+- **Email Verification**: Automated email verification system with SMTP integration
+- **Security**: Password hashing, JWT tokens, rate limiting, and input validation
+- **Responsive Design**: Modern UI with TailwindCSS that works on all devices
+
+## Tech Stack
+
+### Frontend
+
+- **React 19** - User interface library
+- **Vite** - Build tool and development server
+- **React Router** - Client-side routing
+- **TailwindCSS** - Utility-first CSS framework
+- **TanStack Table** - Data table management
+- **Axios** - HTTP client for API requests
+- **Lucide React** - Icon library
+
+### Backend
+
+- **Node.js** - JavaScript runtime
+- **Express.js** - Web application framework
+- **PostgreSQL** - Relational database
+- **JWT** - JSON Web Token authentication
+- **bcrypt** - Password hashing
+- **Nodemailer** - Email service integration
+- **CORS** - Cross-origin resource sharing
+
+### Database
+
+- **PostgreSQL** - Primary database with UUID primary keys
+- **Custom schemas** - User status enums, indexes, and constraints
+
+## Project Structure
+
+```
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── database.js       # Database connection
+│   │   ├── middleware/
+│   │   │   └── auth.js           # Authentication middleware
+│   │   ├── routes/
+│   │   │   ├── auth.js           # Authentication routes
+│   │   │   └── users.js          # User management routes
+│   │   ├── utils/
+│   │   │   ├── emailService.js   # Email sending service
+│   │   │   └── helpers.js        # Utility functions
+│   │   └── server.js             # Express server setup
+│   ├── database/
+│   │   └── schema.sql            # Database schema
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── auth/             # Authentication components
+│   │   │   └── Dashboard.jsx     # Main dashboard
+│   │   ├── utils/
+│   │   │   └── api.js            # API utilities
+│   │   ├── App.jsx               # Main app component
+│   │   └── main.jsx              # React entry point
+│   └── package.json
+└── README.md
+```
+
+## Installation & Setup
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v18 or higher)
 - PostgreSQL (v12 or higher)
-- Gmail account (for email functionality)
+- Git
 
-### 1. Database Setup
-
-1. Create PostgreSQL database:
-
-```sql
-CREATE DATABASE user_management;
-```
-
-2. Run the schema:
+### 1. Clone Repository
 
 ```bash
-psql -d user_management -f backend/database/schema.sql
+git clone <repository-url>
+cd it-user-management-app
 ```
 
-### 2. Backend Setup
+### 2. Database Setup
 
 ```bash
-cd backend
-npm install
-cp .env.example .env
+# Create PostgreSQL database
+createdb user_management
+
+# Import schema
+psql user_management < backend/database/schema.sql
 ```
 
-Edit `.env` file with your configuration:
-
-- Database credentials
-- JWT secret (use a strong random string)
-- Gmail SMTP credentials
-
-### 3. Frontend Setup
-
-```bash
-cd frontend
-npm install
-cp .env.example .env
-```
-
-### 4. Start Development Servers
-
-**Backend** (Terminal 1):
+### 3. Backend Setup
 
 ```bash
 cd backend
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+
+# Update .env with your configuration:
+# - DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+# - JWT_SECRET (generate a secure random string)
+# - EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS
+# - FRONTEND_URL (http://localhost:5173)
+
+# Start development server
 npm run dev
 ```
 
-**Frontend** (Terminal 2):
+### 4. Frontend Setup
 
 ```bash
 cd frontend
+
+# Install dependencies
+npm install
+
+# Create environment file
+cp .env.example .env
+
+# Update .env with:
+# VITE_API_URL=http://localhost:5000/api/v1
+
+# Start development server
 npm run dev
 ```
 
-The application will be available at:
+### 5. Access Application
 
-- Frontend: http://localhost:3000
+- Frontend: http://localhost:5173
 - Backend API: http://localhost:5000
 
-## 📧 Email Configuration
+## Environment Variables
 
-For email functionality, configure Gmail SMTP:
+### Backend (.env)
 
-1. Enable 2-factor authentication on your Gmail account
-2. Generate an app-specific password:
-   - Go to Google Account settings
-   - Security → App passwords
-   - Generate password for "Mail"
-3. Use this password in your `.env` file as `EMAIL_PASS`
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=user_management
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
 
-## 🗄️ Database Schema
+# JWT
+JWT_SECRET=your_jwt_secret_key
 
-The system uses a single `users` table with proper constraints and indexes for performance.
+# Email (Gmail SMTP example)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_app_password
 
-## 🔐 User Flow
+# URLs
+FRONTEND_URL=http://localhost:5173
+```
 
-1. **Registration**: User registers → receives verification email
-2. **Verification**: User clicks email link → account activated
-3. **Login**: User logs in → receives JWT token
-4. **Dashboard**: Authenticated users can manage all users
+### Frontend (.env)
 
-## 🎨 UI Features
+```env
+VITE_API_URL=http://localhost:5000/api/v1
+```
 
-- Clean, professional design
-- Responsive layout (mobile + desktop)
-- TailwindCSS for styling
-- Sortable table columns
-- Bulk selection and operations
-- Inline success/error messages
-
-## 🔧 API Endpoints
+## API Endpoints
 
 ### Authentication
 
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/login` - User login
-- `GET /api/v1/auth/verify/:token` - Email verification
+- `POST /api/v1/auth/verify/:token` - Email verification
+- `POST /api/v1/auth/refresh` - Token refresh
 
 ### User Management
 
-- `GET /api/v1/users` - List users (with pagination/sorting)
-- `PATCH /api/v1/users/block` - Block users
-- `PATCH /api/v1/users/unblock` - Unblock users
-- `DELETE /api/v1/users/delete` - Delete users
+- `GET /api/v1/users` - List users (with pagination/filtering)
+- `PATCH /api/v1/users/block` - Block selected users
+- `PATCH /api/v1/users/unblock` - Unblock selected users
+- `DELETE /api/v1/users/delete` - Delete selected users
 - `DELETE /api/v1/users/delete-unverified` - Delete unverified users
+- `GET /api/v1/users/stats` - User statistics
+
+## Production Deployment
+
+### Build Frontend
+
+```bash
+cd frontend
+npm run build
+```
+
+### Start Production Backend
+
+```bash
+cd backend
+npm start
+```
+
+### Environment Considerations
+
+- Update CORS origins for production domains
+- Use secure JWT secrets (32+ characters)
+- Configure production database
+- Set up proper email service (SendGrid, AWS SES, etc.)
+- Enable HTTPS
+- Set up proper logging
+
+## 🚀 Deployment Guide
+
+### Method 1: Render + Vercel (Free)
+
+#### Backend Deployment (Render)
+
+1. **Create Render Account**: [render.com](https://render.com)
+2. **Create New Web Service**: Connect your GitHub repo
+3. **Settings**:
+   - **Build Command**: `cd backend && npm install`
+   - **Start Command**: `cd backend && npm start`
+   - **Environment**: Node
+4. **Environment Variables**:
+   ```
+   NODE_ENV=production
+   JWT_SECRET=your-long-random-secret
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=587
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-app-password
+   FRONTEND_URL=https://your-app.vercel.app
+   ```
+5. **Add PostgreSQL Database**: Render → Create → PostgreSQL
+6. **Copy DATABASE_URL**: Add to environment variables
+
+#### Frontend Deployment (Vercel)
+
+1. **Create Vercel Account**: [vercel.com](https://vercel.com)
+2. **Import Project**: Connect GitHub repo
+3. **Root Directory**: `frontend`
+4. **Environment Variables**:
+   ```
+   VITE_API_URL=https://your-backend.render.com/api/v1
+   ```
+5. **Deploy**: Automatic deployment on git push
+
+### Method 2: Railway (Full-Stack)
+
+1. **Create Railway Account**: [railway.app](https://railway.app)
+2. **Deploy from GitHub**: One-click deployment
+3. **Add PostgreSQL**: Railway → Add Service → PostgreSQL
+4. **Set Environment Variables**: Same as above
+
+### Method 3: Local with ngrok (Development)
+
+```bash
+# Install ngrok
+npm install -g ngrok
+
+# Start backend
+cd backend && npm run dev
+
+# In new terminal, expose backend
+ngrok http 5000
+
+# Start frontend with ngrok URL
+cd frontend && VITE_API_URL=https://abc123.ngrok.io/api/v1 npm run dev
+```
+
+## 📋 Post-Deployment Checklist
+
+- [ ] Backend health check: `GET /api/v1/health`
+- [ ] Frontend loads without errors
+- [ ] User registration works
+- [ ] Email verification works
+- [ ] Login/logout functionality
+- [ ] User management features
+- [ ] Database operations work
+
+## License
+
+MIT License - see LICENSE file for details

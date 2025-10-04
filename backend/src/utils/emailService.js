@@ -1,8 +1,3 @@
-/**
- * Email Service Configuration
- * Important: This module handles all email sending functionality using nodemailer
- */
-
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 

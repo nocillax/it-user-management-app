@@ -1,8 +1,3 @@
-/**
- * Register Component
- * Important: Handles user registration with validation and clean design
- */
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Mail, User } from "lucide-react";
@@ -20,10 +15,6 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
-  /**
-   * Handle form input changes
-   * @param {Event} e - Input change event
-   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -31,16 +22,11 @@ const Register = () => {
       [name]: value,
     }));
 
-    // Clear error message when user starts typing
     if (message.type === "error") {
       setMessage({ type: "", text: "" });
     }
   };
 
-  /**
-   * Validate form data
-   * @returns {string|null} Error message or null if valid
-   */
   const validateForm = () => {
     if (!formData.name.trim()) {
       return "Name is required";
@@ -61,11 +47,6 @@ const Register = () => {
     return null;
   };
 
-  /**
-   * Handle form submission
-   * Important: Validates input and registers user
-   * @param {Event} e - Form submit event
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -98,7 +79,6 @@ const Register = () => {
         confirmPassword: "",
       });
     } catch (error) {
-      console.error("Registration error:", error);
       setMessage({
         type: "error",
         text: apiUtils.getErrorMessage(error),

@@ -1,8 +1,3 @@
-/**
- * Email Verification Component
- * Important: Handles email verification from verification links
- */
-
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { CheckCircle, XCircle, Mail, Loader } from "lucide-react";
@@ -13,10 +8,6 @@ const EmailVerification = () => {
   const [status, setStatus] = useState("verifying"); // verifying, success, error
   const [message, setMessage] = useState("");
 
-  /**
-   * Verify email with token on component mount
-   * Important: Automatically verifies email when user clicks verification link
-   */
   useEffect(() => {
     const verifyEmail = async () => {
       try {
@@ -31,7 +22,7 @@ const EmailVerification = () => {
           response.message || "Email verified successfully! You can now login."
         );
       } catch (error) {
-        console.error("Email verification error:", error);
+        // Verification failed
         setStatus("error");
         setMessage(apiUtils.getErrorMessage(error));
       }

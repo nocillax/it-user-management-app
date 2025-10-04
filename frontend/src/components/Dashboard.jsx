@@ -1,8 +1,3 @@
-/**
- * Dashboard Component
- * Important: Main dashboard with user management table and toolbar functionality
- */
-
 import { useState, useEffect, useMemo } from "react";
 import {
   useReactTable,
@@ -10,16 +5,16 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
   createColumnHelper,
+  flexRender,
 } from "@tanstack/react-table";
 import {
   ChevronUp,
   ChevronDown,
   LogOut,
-  Shield,
-  ShieldOff,
+  Lock,
+  Unlock,
   Trash2,
-  UserX,
-  Filter,
+  Eraser,
   RefreshCw,
 } from "lucide-react";
 import { userAPI, authAPI, apiUtils } from "../utils/api";
@@ -33,13 +28,8 @@ const Dashboard = ({ onLogout }) => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Get current user info
   const currentUser = apiUtils.getCurrentUser();
 
-  /**
-   * Load users from API
-   * Important: Fetches and displays all users with proper error handling
-   */
   const loadUsers = async () => {
     try {
       setIsLoading(true);
@@ -47,7 +37,6 @@ const Dashboard = ({ onLogout }) => {
       setUsers(response.data.users || []);
       setMessage({ type: "", text: "" });
     } catch (error) {
-      console.error("Error loading users:", error);
       setMessage({
         type: "error",
         text: apiUtils.getErrorMessage(error),
@@ -57,17 +46,10 @@ const Dashboard = ({ onLogout }) => {
     }
   };
 
-  /**
-   * Load users on component mount
-   */
   useEffect(() => {
     loadUsers();
   }, []);
 
-  /**
-   * Handle row selection
-   * @param {string} userId - User ID to toggle selection
-   */
   const toggleUserSelection = (userId) => {
     const newSelected = new Set(selectedUsers);
     if (newSelected.has(userId)) {
@@ -78,9 +60,6 @@ const Dashboard = ({ onLogout }) => {
     setSelectedUsers(newSelected);
   };
 
-  /**
-   * Handle select all users
-   */
   const toggleSelectAll = () => {
     if (selectedUsers.size === filteredUsers.length) {
       setSelectedUsers(new Set());
@@ -89,17 +68,11 @@ const Dashboard = ({ onLogout }) => {
     }
   };
 
-  /**
-   * Filter users based on status filter
-   */
   const filteredUsers = useMemo(() => {
     if (statusFilter === "all") return users;
     return users.filter((user) => user.status === statusFilter);
   }, [users, statusFilter]);
 
-  /**
-   * Handle bulk actions
-   */
   const handleBulkAction = async (action) => {
     if (selectedUsers.size === 0) {
       setMessage({ type: "error", text: "Please select users first" });
@@ -110,20 +83,19 @@ const Dashboard = ({ onLogout }) => {
     setIsLoading(true);
 
     try {
-      let response;
       let successMessage;
 
       switch (action) {
         case "block":
-          response = await userAPI.blockUsers(userIds);
+          await userAPI.blockUsers(userIds);
           successMessage = `Successfully blocked ${userIds.length} user(s)`;
           break;
         case "unblock":
-          response = await userAPI.unblockUsers(userIds);
+          await userAPI.unblockUsers(userIds);
           successMessage = `Successfully unblocked ${userIds.length} user(s)`;
           break;
         case "delete":
-          response = await userAPI.deleteUsers(userIds);
+          await userAPI.deleteUsers(userIds);
           successMessage = `Successfully deleted ${userIds.length} user(s)`;
           break;
         default:
@@ -132,9 +104,8 @@ const Dashboard = ({ onLogout }) => {
 
       setMessage({ type: "success", text: successMessage });
       setSelectedUsers(new Set());
-      await loadUsers(); // Reload users after action
+      await loadUsers();
     } catch (error) {
-      console.error(`Error performing ${action}:`, error);
       setMessage({
         type: "error",
         text: apiUtils.getErrorMessage(error),
@@ -144,21 +115,17 @@ const Dashboard = ({ onLogout }) => {
     }
   };
 
-  /**
-   * Handle delete unverified users
-   */
   const handleDeleteUnverified = async () => {
     setIsLoading(true);
 
     try {
-      const response = await userAPI.deleteUnverified();
+      await userAPI.deleteUnverified();
       setMessage({
         type: "success",
         text: "Successfully deleted unverified users",
       });
-      await loadUsers(); // Reload users after action
+      await loadUsers();
     } catch (error) {
-      console.error("Error deleting unverified users:", error);
       setMessage({
         type: "error",
         text: apiUtils.getErrorMessage(error),
@@ -168,11 +135,6 @@ const Dashboard = ({ onLogout }) => {
     }
   };
 
-  /**
-   * Format date for display
-   * @param {string} dateString - ISO date string
-   * @returns {string} Formatted date
-   */
   const formatDate = (dateString) => {
     if (!dateString) return "Never";
 
@@ -195,11 +157,6 @@ const Dashboard = ({ onLogout }) => {
     );
   };
 
-  /**
-   * Get status badge styling
-   * @param {string} status - User status
-   * @returns {string} CSS classes
-   */
   const getStatusBadge = (status) => {
     switch (status) {
       case "active":
@@ -213,10 +170,8 @@ const Dashboard = ({ onLogout }) => {
     }
   };
 
-  // Define table columns
   const columnHelper = createColumnHelper();
   const columns = [
-    // Checkbox column
     columnHelper.display({
       id: "select",
       header: () => (
@@ -241,7 +196,6 @@ const Dashboard = ({ onLogout }) => {
       enableSorting: false,
       size: 50,
     }),
-    // Name column
     columnHelper.accessor("name", {
       header: "Name",
       cell: ({ getValue, row }) => (
@@ -253,12 +207,10 @@ const Dashboard = ({ onLogout }) => {
         </div>
       ),
     }),
-    // Email column
     columnHelper.accessor("email", {
       header: "Email",
       cell: ({ getValue }) => <div className="text-gray-600">{getValue()}</div>,
     }),
-    // Status column
     columnHelper.accessor("status", {
       header: "Status",
       cell: ({ getValue }) => (
@@ -271,7 +223,6 @@ const Dashboard = ({ onLogout }) => {
         </span>
       ),
     }),
-    // Last login column
     columnHelper.accessor("last_login", {
       header: "Last Login",
       cell: ({ getValue }) => (
@@ -280,7 +231,6 @@ const Dashboard = ({ onLogout }) => {
     }),
   ];
 
-  // Initialize table
   const table = useReactTable({
     data: filteredUsers,
     columns,
@@ -374,34 +324,34 @@ const Dashboard = ({ onLogout }) => {
 
         {/* Toolbar */}
         <div className="mb-6 bg-white border border-gray-200 rounded-lg p-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm font-medium text-gray-700">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700 mr-3">
               Actions ({selectedUsers.size} selected):
             </span>
 
             <button
               onClick={() => handleBulkAction("block")}
               disabled={selectedUsers.size === 0 || isLoading}
-              className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Block selected users"
             >
-              <Shield className="h-4 w-4" />
+              <Lock className="h-4 w-4" />
               <span>Block</span>
             </button>
 
             <button
               onClick={() => handleBulkAction("unblock")}
               disabled={selectedUsers.size === 0 || isLoading}
-              className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+              className="inline-flex items-center justify-center w-9 h-9 text-blue-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Unblock selected users"
             >
-              <ShieldOff className="h-4 w-4" />
+              <Unlock className="h-4 w-4" />
             </button>
 
             <button
               onClick={() => handleBulkAction("delete")}
               disabled={selectedUsers.size === 0 || isLoading}
-              className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1 text-red-600 hover:text-red-700"
+              className="inline-flex items-center justify-center w-9 h-9 text-red-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-red-50 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Delete selected users"
             >
               <Trash2 className="h-4 w-4" />
@@ -410,10 +360,10 @@ const Dashboard = ({ onLogout }) => {
             <button
               onClick={handleDeleteUnverified}
               disabled={isLoading}
-              className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1 text-red-600 hover:text-red-700"
+              className="inline-flex items-center justify-center w-9 h-9 text-orange-600 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-orange-50 hover:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               title="Delete all unverified users"
             >
-              <UserX className="h-4 w-4" />
+              <Eraser className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -449,7 +399,10 @@ const Dashboard = ({ onLogout }) => {
                           <span>
                             {header.isPlaceholder
                               ? null
-                              : header.column.columnDef.header}
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
                           </span>
                           {header.column.getCanSort() && (
                             <span className="text-gray-400">
@@ -494,7 +447,10 @@ const Dashboard = ({ onLogout }) => {
                     <tr key={row.id} className="hover:bg-gray-50">
                       {row.getVisibleCells().map((cell) => (
                         <td key={cell.id} className="table-cell">
-                          {cell.column.columnDef.cell?.(cell.getContext())}
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
                         </td>
                       ))}
                     </tr>

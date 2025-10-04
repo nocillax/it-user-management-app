@@ -1,8 +1,3 @@
-/**
- * Login Component
- * Important: Handles user authentication with clean, professional design
- */
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Mail } from "lucide-react";
@@ -18,10 +13,6 @@ const Login = ({ onLoginSuccess }) => {
   const [message, setMessage] = useState({ type: "", text: "" });
   const [rememberMe, setRememberMe] = useState(false);
 
-  /**
-   * Handle form input changes
-   * @param {Event} e - Input change event
-   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -29,41 +20,24 @@ const Login = ({ onLoginSuccess }) => {
       [name]: value,
     }));
 
-    // Clear error message when user starts typing
     if (message.type === "error") {
       setMessage({ type: "", text: "" });
     }
   };
 
-  /**
-   * Handle form submission
-   * Important: Validates input and authenticates user
-   * @param {Event} e - Form submit event
-   */
   const handleSubmit = async (e) => {
-    console.log("handleSubmit called", {
-      email: formData.email,
-      password: formData.password,
-    });
-
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
 
-    if (isLoading) {
-      console.log("Already loading, returning");
-      return; // Prevent double submission
-    }
+    if (isLoading) return;
 
-    console.log("Setting loading to true");
     setIsLoading(true);
     setMessage({ type: "", text: "" });
 
     try {
-      // Basic validation
       if (!formData.email || !formData.password) {
-        console.log("Validation failed - empty fields");
         setMessage({
           type: "error",
           text: "Please fill in all fields",
@@ -72,28 +46,22 @@ const Login = ({ onLoginSuccess }) => {
         return;
       }
 
-      console.log("Attempting login with API");
-      // Attempt login
-      const response = await authAPI.login(formData.email, formData.password);
+      await authAPI.login(formData.email, formData.password);
 
       setMessage({
         type: "success",
         text: "Login successful! Redirecting...",
       });
 
-      // Notify parent component of successful login
       setTimeout(() => {
         onLoginSuccess();
       }, 1000);
     } catch (error) {
-      console.error("Login error:", error);
-      console.log("Setting error message:", apiUtils.getErrorMessage(error));
       setMessage({
         type: "error",
         text: apiUtils.getErrorMessage(error),
       });
     } finally {
-      console.log("Setting loading to false in finally");
       setIsLoading(false);
     }
   };

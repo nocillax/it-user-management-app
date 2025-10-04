@@ -1,15 +1,8 @@
-/**
- * Authentication Routes
- * Important: Handles user registration, login, and verification
- */
-
 const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { query } = require("../config/database");
 const {
-  getUniqIdValue,
-  generateVerificationToken,
   isValidEmail,
   formatErrorResponse,
   formatSuccessResponse,
@@ -22,14 +15,8 @@ const { sendVerificationEmail } = require("../utils/emailService");
 
 const router = express.Router();
 
-// Rate limiting for auth routes
-// Important: Prevent brute force attacks
-const authRateLimit = createRateLimit(50, 1 * 60 * 1000); // 50 requests per 1 minute (development)
+const authRateLimit = createRateLimit(50, 1 * 60 * 1000);
 
-/**
- * POST /register - Register a new user
- * Nota bene: Creates user with 'unverified' status and sends verification email
- */
 router.post(
   "/register",
   authRateLimit,
@@ -53,12 +40,10 @@ router.post(
       }
 
       // Hash password
-      // Important: Use high salt rounds for security
       const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
       const passwordHash = await bcrypt.hash(password, saltRounds);
 
       // Insert user into database
-      // Note: Database will handle unique email constraint
       try {
         const result = await query(
           `INSERT INTO users (name, email, password_hash, status) 
@@ -77,19 +62,13 @@ router.post(
         );
 
         // Send verification email asynchronously
-        // Important: Don't block response on email sending
         sendVerificationEmail(
           newUser.email,
           newUser.name,
           verificationToken
-        ).catch((error) => {
-          console.error("Failed to send verification email:", error);
-        });
+        ).catch((error) => {});
 
         // For testing: Log verification link (remove in production)
-        console.log(
-          `🔗 Verification link for ${newUser.email}: ${process.env.FRONTEND_URL}/verify/${verificationToken}`
-        );
 
         res.status(201).json(
           formatSuccessResponse(
@@ -114,16 +93,11 @@ router.post(
         throw dbError;
       }
     } catch (error) {
-      console.error("Registration error:", error);
       res.status(500).json(formatErrorResponse("Registration failed"));
     }
   }
 );
 
-/**
- * POST /login - Authenticate user and return JWT
- * Important: Validates credentials and updates last_login timestamp
- */
 router.post(
   "/login",
   authRateLimit,
@@ -190,16 +164,11 @@ router.post(
         })
       );
     } catch (error) {
-      console.error("Login error:", error);
       res.status(500).json(formatErrorResponse("Login failed"));
     }
   }
 );
 
-/**
- * GET /verify/:token - Verify user email address
- * Note: This route activates unverified accounts
- */
 router.get("/verify/:token", async (req, res) => {
   try {
     const { token } = req.params;
@@ -254,15 +223,10 @@ router.get("/verify/:token", async (req, res) => {
       })
     );
   } catch (error) {
-    console.error("Verification error:", error);
     res.status(500).json(formatErrorResponse("Email verification failed"));
   }
 });
 
-/**
- * POST /refresh - Refresh JWT token
- * Important: Allows users to get new token without re-login
- */
 router.post("/refresh", async (req, res) => {
   try {
     const { token } = req.body;
@@ -319,7 +283,6 @@ router.post("/refresh", async (req, res) => {
       })
     );
   } catch (error) {
-    console.error("Token refresh error:", error);
     res.status(500).json(formatErrorResponse("Token refresh failed"));
   }
 });
