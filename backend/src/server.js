@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
     status: "OK",
     message: "IT User Management API is running",
     documentation: "/api/v1",
-    healthCheck: "/health"
+    healthCheck: "/health",
   });
 });
 
