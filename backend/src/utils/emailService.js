@@ -14,6 +14,12 @@ const createTransporter = () => {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS, // Use app-specific password for Gmail
     },
+    // Add connection timeout settings - increase timeouts for Render
+    connectionTimeout: 60000, // 60 seconds (default is 10 seconds)
+    greetingTimeout: 30000, // 30 seconds
+    socketTimeout: 60000, // 60 seconds
+    // Add proxy handling in case Render requires it
+    proxy: process.env.EMAIL_PROXY || null,
   });
 };
 
@@ -26,14 +32,38 @@ const createTransporter = () => {
  * @returns {Promise} Email sending result
  */
 const sendVerificationEmail = async (email, name, token) => {
-  try {
-    const transporter = createTransporter();
+  // Maximum number of retry attempts
+  const MAX_RETRIES = 2;
+  let retryCount = 0;
+  let lastError = null;
 
-    // Verification URL
-    const verificationUrl = `${process.env.FRONTEND_URL}/verify/${token}`;
+  // Retry loop for handling temporary connection issues
+  while (retryCount <= MAX_RETRIES) {
+    try {
+      if (retryCount > 0) {
+        console.log(
+          `Retry attempt ${retryCount} for sending email to ${email}...`
+        );
+        // Wait before retrying (exponential backoff)
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * Math.pow(2, retryCount))
+        );
+      }
 
-    // Email template
-    const htmlContent = `
+      console.log(`Creating email transporter (attempt ${retryCount + 1})...`);
+      const transporter = createTransporter();
+
+      // Test transporter connection before sending
+      console.log(`Verifying SMTP connection...`);
+      await transporter.verify();
+      console.log(`SMTP connection verified successfully!`);
+
+      // Verification URL
+      const verificationUrl = `${process.env.FRONTEND_URL}/verify/${token}`;
+      console.log(`Verification URL will be: ${verificationUrl}`);
+
+      // Email template
+      const htmlContent = `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -87,8 +117,8 @@ const sendVerificationEmail = async (email, name, token) => {
         </html>
         `;
 
-    // Text version for email clients that don't support HTML
-    const textContent = `
+      // Text version for email clients that don't support HTML
+      const textContent = `
         Welcome to NX IT-UMS!
 
         Hi ${name},
@@ -103,22 +133,77 @@ const sendVerificationEmail = async (email, name, token) => {
         The NX IT-UMS Team
         `;
 
-    // Send email
-    const mailOptions = {
-      from: process.env.EMAIL_FROM || `"NX IT-UMS" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Verify Your Email Address - NX IT-UMS",
-      text: textContent,
-      html: htmlContent,
-    };
+      // Send email
+      const mailOptions = {
+        from:
+          process.env.EMAIL_FROM || `"NX IT-UMS" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Verify Your Email Address - NX IT-UMS",
+        text: textContent,
+        html: htmlContent,
+        // Add priority and importance headers
+        priority: "high",
+        importance: "high",
+        // Add delivery settings to help with timeouts
+        dsn: {
+          id: `verification-${Date.now()}`,
+          return: "headers",
+          notify: ["failure", "delay"],
+          recipient: process.env.EMAIL_USER,
+        },
+      };
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`✅ Verification email sent to ${email}: ${result.messageId}`);
-    return result;
-  } catch (error) {
-    console.error("❌ Error sending verification email:", error);
-    throw error;
+      console.log(`Sending verification email to ${email}...`);
+      const result = await transporter.sendMail(mailOptions);
+      console.log(
+        `✅ Verification email sent to ${email}: ${result.messageId}`
+      );
+      return result;
+    } catch (error) {
+      lastError = error;
+      console.error(
+        `❌ Error sending verification email (attempt ${retryCount + 1}):`,
+        error
+      );
+
+      // Only retry on connection-related errors
+      if (
+        error.code === "ETIMEDOUT" ||
+        error.code === "ECONNREFUSED" ||
+        error.code === "ECONNRESET" ||
+        error.code === "ESOCKET"
+      ) {
+        retryCount++;
+      } else {
+        // Don't retry for auth errors or other non-connection issues
+        break;
+      }
+    }
   }
+
+  // If we get here, all retry attempts failed
+  console.error(
+    `❌ Failed to send verification email after ${MAX_RETRIES + 1} attempts`
+  );
+
+  // Special handling for Render deployment - let's try a fallback approach
+  if (process.env.NODE_ENV === "production") {
+    console.log(
+      "Attempting alternative approach for production environment..."
+    );
+    // In a real scenario, you might want to queue the email for later delivery
+    // or use a third-party service like SendGrid, Mailgun, etc.
+
+    // For now, let's just log the verification URL so it's visible in the logs
+    console.log(`
+      ====================================================================
+      VERIFICATION URL (since email couldn't be sent): 
+      ${process.env.FRONTEND_URL}/verify/${token}
+      ====================================================================
+    `);
+  }
+
+  throw lastError;
 };
 
 /**

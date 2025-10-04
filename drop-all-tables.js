@@ -3,7 +3,7 @@
 const { Pool } = require("pg");
 
 // Use the external database URL
-const DATABASE_URL = 
+const DATABASE_URL =
   "postgresql://user_management_oood_user:PIRllnjte9QBSwVCi0Kser1KuUxCugYE@dpg-d3gbtf7fte5s73c0dobg-a.oregon-postgres.render.com:5432/user_management_oood";
 
 async function dropEverything() {
@@ -28,12 +28,12 @@ async function dropEverything() {
       WHERE table_schema = 'public' 
       AND table_type = 'BASE TABLE';
     `);
-    
-    const tables = tablesResult.rows.map(row => row.table_name);
-    
+
+    const tables = tablesResult.rows.map((row) => row.table_name);
+
     if (tables.length > 0) {
-      console.log(`Found ${tables.length} tables: ${tables.join(', ')}`);
-      
+      console.log(`Found ${tables.length} tables: ${tables.join(", ")}`);
+
       // Drop each table with CASCADE to ensure all dependencies are removed
       for (const table of tables) {
         try {
@@ -56,12 +56,14 @@ async function dropEverything() {
       WHERE routine_type = 'FUNCTION' 
       AND routine_schema = 'public';
     `);
-    
-    const functions = functionsResult.rows.map(row => row.routine_name);
-    
+
+    const functions = functionsResult.rows.map((row) => row.routine_name);
+
     if (functions.length > 0) {
-      console.log(`Found ${functions.length} functions: ${functions.join(', ')}`);
-      
+      console.log(
+        `Found ${functions.length} functions: ${functions.join(", ")}`
+      );
+
       // Drop each function
       for (const func of functions) {
         try {
@@ -85,12 +87,12 @@ async function dropEverything() {
       WHERE n.nspname = 'public'
       AND t.typtype = 'e'; -- 'e' is for enum types
     `);
-    
-    const types = typesResult.rows.map(row => row.type_name);
-    
+
+    const types = typesResult.rows.map((row) => row.type_name);
+
     if (types.length > 0) {
-      console.log(`Found ${types.length} custom types: ${types.join(', ')}`);
-      
+      console.log(`Found ${types.length} custom types: ${types.join(", ")}`);
+
       // Drop each type
       for (const type of types) {
         try {
@@ -106,8 +108,10 @@ async function dropEverything() {
     }
 
     console.log("\n✅ Database schema has been completely cleared!");
-    console.log("You can now run init-db.js to recreate the schema from scratch.");
-    
+    console.log(
+      "You can now run init-db.js to recreate the schema from scratch."
+    );
+
     client.release();
     await pool.end();
   } catch (error) {
@@ -116,13 +120,17 @@ async function dropEverything() {
 }
 
 // Ask for confirmation before running
-console.log("⚠️  WARNING: This will PERMANENTLY DELETE ALL tables, functions, and types from your database!");
+console.log(
+  "⚠️  WARNING: This will PERMANENTLY DELETE ALL tables, functions, and types from your database!"
+);
 console.log("ALL DATA WILL BE LOST and cannot be recovered!");
-console.log("Press Ctrl+C now to cancel if you want to keep your database schema.");
+console.log(
+  "Press Ctrl+C now to cancel if you want to keep your database schema."
+);
 console.log("Proceeding in 10 seconds...");
 
 setTimeout(() => {
-  dropEverything().catch(err => {
+  dropEverything().catch((err) => {
     console.error("Unhandled error:", err);
   });
 }, 10000);

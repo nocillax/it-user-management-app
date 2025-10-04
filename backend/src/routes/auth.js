@@ -61,12 +61,23 @@ router.post(
           { expiresIn: "24h" }
         );
 
-        // Send verification email asynchronously
+        // Send verification email asynchronously - don't wait for completion
         sendVerificationEmail(
           newUser.email,
           newUser.name,
           verificationToken
-        ).catch((error) => {});
+        ).catch((error) => {
+          console.error("Failed to send verification email:", error.message);
+          // Log verification URL in case of email failure (only in development)
+          if (process.env.NODE_ENV === "development") {
+            console.log(`
+              ====================================================================
+              VERIFICATION URL (since email couldn't be sent): 
+              ${process.env.FRONTEND_URL}/verify/${verificationToken}
+              ====================================================================
+            `);
+          }
+        });
 
         // For testing: Log verification link (remove in production)
 
