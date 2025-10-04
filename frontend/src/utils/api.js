@@ -1,7 +1,15 @@
 import axios from "axios";
 
+// Use the API URL defined in Vite config, fallback to environment variable, then local dev URL
+const apiBaseURL =
+  __API_URL__ ||
+  import.meta.env.VITE_API_URL ||
+  "https://it-user-management-app.onrender.com/api/v1";
+
+console.log("API Base URL:", apiBaseURL); // For debugging
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1",
+  baseURL: apiBaseURL,
   headers: {
     "Content-Type": "application/json",
   },

@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       process.env.FRONTEND_URL || "http://localhost:5173",
-      "https://nocillax-it-ums.vercel.app"
+      "https://nocillax-it-ums.vercel.app",
     ],
     credentials: true,
   })
