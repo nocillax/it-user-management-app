@@ -37,6 +37,21 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
+// Environment variables check route (for debugging)
+app.get("/check-env", (req, res) => {
+  res.json({
+    env_vars_set: {
+      EMAIL_HOST: process.env.EMAIL_HOST ? 'Set' : 'Not set',
+      EMAIL_PORT: process.env.EMAIL_PORT ? 'Set' : 'Not set',
+      EMAIL_USER: process.env.EMAIL_USER ? 'Set' : 'Not set',
+      EMAIL_PASS: process.env.EMAIL_PASS ? 'Set' : 'Not set',
+      EMAIL_FROM: process.env.EMAIL_FROM ? 'Set' : 'Not set',
+      JWT_SECRET: process.env.JWT_SECRET ? 'Set' : 'Not set',
+      FRONTEND_URL: process.env.FRONTEND_URL || 'Not set',  // It's safe to show this one
+    }
+  });
+});
+
 // Root route - welcome page
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -44,6 +59,7 @@ app.get("/", (req, res) => {
     message: "IT User Management API is running",
     documentation: "/api/v1",
     healthCheck: "/health",
+    envCheck: "/check-env",
   });
 });
 

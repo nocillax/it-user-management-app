@@ -66,7 +66,7 @@ INSERT INTO users (name, email, password_hash, status, last_login)
 VALUES (
     'Administrator',
     'admin@example.com',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+    '$2b$12$stI8WNGisqUJIdoTzL2pRewPyp50xPKEQEfFiSMVOgmdHAGnh3VvK',
     'active',
     CURRENT_TIMESTAMP
 );
