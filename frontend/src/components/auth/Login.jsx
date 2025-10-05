@@ -35,6 +35,14 @@ const Login = ({ onLoginSuccess }) => {
 
     setIsLoading(true);
     setMessage({ type: "", text: "" });
+    
+    // Set a timeout to show a message if login takes too long
+    const slowLoginTimer = setTimeout(() => {
+      setMessage({
+        type: "info",
+        text: "The server might be starting up. Please wait a moment...",
+      });
+    }, 3000);
 
     try {
       if (!formData.email || !formData.password) {
@@ -46,8 +54,17 @@ const Login = ({ onLoginSuccess }) => {
         return;
       }
 
+      // First, ping the server to wake it up if it's sleeping
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/ping`, { method: 'GET' });
+      } catch (e) {
+        // Ignore errors from ping, it's just to wake up the server
+      }
+
+      // Perform the actual login
       await authAPI.login(formData.email, formData.password);
 
+      clearTimeout(slowLoginTimer);
       setMessage({
         type: "success",
         text: "Login successful! Redirecting...",
@@ -57,6 +74,7 @@ const Login = ({ onLoginSuccess }) => {
         onLoginSuccess();
       }, 1000);
     } catch (error) {
+      clearTimeout(slowLoginTimer);
       setMessage({
         type: "error",
         text: apiUtils.getErrorMessage(error),
@@ -160,12 +178,14 @@ const Login = ({ onLoginSuccess }) => {
               </label>
             </div>
 
-            {/* Error/Success Message */}
+            {/* Error/Success/Info Message */}
             {message.text && (
               <div
                 className={`p-3 rounded-lg text-sm ${
                   message.type === "error"
                     ? "bg-red-50 text-red-700 border border-red-200"
+                    : message.type === "info"
+                    ? "bg-blue-50 text-blue-700 border border-blue-200"
                     : "bg-green-50 text-green-700 border border-green-200"
                 }`}
               >

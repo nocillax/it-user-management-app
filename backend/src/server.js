@@ -59,9 +59,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Basic health check route
+// Basic health check route - respond quickly to keep server warm
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+// Simple ping endpoint that responds instantly (useful for keeping server warm)
+app.get("/ping", (req, res) => {
+  res.status(200).send("pong");
 });
 
 // Environment variables check route (for debugging)

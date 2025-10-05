@@ -108,7 +108,7 @@ router.post(
     try {
       const { email, password } = req.body;
 
-      // Find user by email
+      // Find user by email - use indexed column for fast lookup
       const userResult = await query(
         "SELECT id, name, email, password_hash, status FROM users WHERE email = $1",
         [email.toLowerCase().trim()]
@@ -137,22 +137,27 @@ router.post(
           .json(formatErrorResponse("Invalid email or password"));
       }
 
-      // Update last login timestamp
-      await query(
-        "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1",
-        [user.id]
-      );
-
-      // Generate JWT token
-      const token = jwt.sign(
-        {
-          userId: user.id,
-          email: user.email,
-          status: user.status,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN }
-      );
+      // Generate JWT token in parallel with updating last login timestamp
+      const [, token] = await Promise.all([
+        // Update last login timestamp
+        query(
+          "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1",
+          [user.id]
+        ),
+        // Generate JWT token
+        new Promise((resolve) => {
+          const token = jwt.sign(
+            {
+              userId: user.id,
+              email: user.email,
+              status: user.status,
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN }
+          );
+          resolve(token);
+        })
+      ]);
 
       res.json(
         formatSuccessResponse("Login successful", {

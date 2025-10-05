@@ -1,6 +1,7 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
+// Configure PostgreSQL connection pool
 const pool = new Pool(
   process.env.DATABASE_URL
     ? {
@@ -19,9 +20,37 @@ const pool = new Pool(
       }
 );
 
-pool.max = 20;
-pool.idleTimeoutMillis = 30000;
-pool.connectionTimeoutMillis = 2000;
+// Optimize pool settings to keep connections alive and responsive
+pool.max = 20; // Maximum pool size
+pool.idleTimeoutMillis = 60000; // Longer idle timeout (1 minute)
+pool.connectionTimeoutMillis = 5000; // Longer connection timeout (5 seconds)
+
+// Track pool errors to improve diagnostics
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+});
+
+// Keep at least one connection warm to reduce cold start times
+let warmConnection = null;
+const keepConnectionWarm = async () => {
+  try {
+    // Release existing connection if it exists
+    if (warmConnection) {
+      warmConnection.release();
+    }
+    // Get a new connection
+    warmConnection = await pool.connect();
+    console.log('Keeping database connection warm');
+  } catch (error) {
+    console.error('Failed to keep connection warm:', error);
+  }
+};
+
+// Initialize warm connection
+keepConnectionWarm();
+
+// Setup periodic ping to keep connection alive (every 5 minutes)
+setInterval(keepConnectionWarm, 5 * 60 * 1000);
 
 const testConnection = async () => {
   try {
