@@ -25,6 +25,9 @@ CREATE TABLE users (
     -- Default is 'unverified' for new registrations
     status user_status DEFAULT 'unverified' NOT NULL,
     
+    -- Previous status - used to store status before blocking
+    previous_status user_status,
+    
     -- Timestamp fields for tracking
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP WITH TIME ZONE,

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Eye, EyeOff, Mail, User } from "lucide-react";
+import { Eye, EyeOff, Mail, User, RefreshCw } from "lucide-react";
 import { authAPI, apiUtils } from "../../utils/api";
 
 const Register = () => {
@@ -14,6 +14,30 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [canResend, setCanResend] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+
+  // Countdown timer for resend button
+  useEffect(() => {
+    let timer;
+    if (resendCountdown > 0) {
+      timer = setTimeout(() => {
+        setResendCountdown(resendCountdown - 1);
+      }, 1000);
+    } else if (registeredEmail) {
+      setCanResend(true);
+    }
+    return () => clearTimeout(timer);
+  }, [resendCountdown, registeredEmail]);
+
+  // Format seconds to MM:SS
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -47,6 +71,32 @@ const Register = () => {
     return null;
   };
 
+  const handleResendVerification = async () => {
+    if (!canResend || isResending) return;
+
+    setIsResending(true);
+
+    try {
+      await authAPI.resendVerification(registeredEmail);
+
+      setMessage({
+        type: "success",
+        text: "Verification email resent! Please check your inbox.",
+      });
+
+      // Reset countdown
+      setResendCountdown(60);
+      setCanResend(false);
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: apiUtils.getErrorMessage(error),
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -59,12 +109,21 @@ const Register = () => {
         throw new Error(validationError);
       }
 
+      const email = formData.email.trim();
+
       // Attempt registration
       const response = await authAPI.register({
         name: formData.name.trim(),
-        email: formData.email.trim(),
+        email: email,
         password: formData.password,
       });
+
+      // Save email for resend functionality
+      setRegisteredEmail(email);
+
+      // Start countdown for resend
+      setResendCountdown(60);
+      setCanResend(false);
 
       setMessage({
         type: "success",
@@ -212,6 +271,39 @@ const Register = () => {
                 }`}
               >
                 {message.text}
+
+                {/* Resend verification section */}
+                {message.type === "success" && registeredEmail && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="text-sm">
+                      {resendCountdown > 0
+                        ? `Resend available in: ${formatTime(resendCountdown)}`
+                        : "Didn't receive the email?"}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={!canResend || isResending}
+                      className={`ml-2 px-3 py-1 text-xs rounded flex items-center ${
+                        canResend && !isResending
+                          ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      }`}
+                    >
+                      {isResending ? (
+                        <>
+                          <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                          Resending...
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="h-3 w-3 mr-1" />
+                          Resend
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

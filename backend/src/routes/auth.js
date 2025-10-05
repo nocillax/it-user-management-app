@@ -67,19 +67,10 @@ router.post(
           newUser.name,
           verificationToken
         ).catch((error) => {
-          console.error("Failed to send verification email:", error.message);
-          // Log verification URL in case of email failure (only in development)
-          if (process.env.NODE_ENV === "development") {
-            console.log(`
-              ====================================================================
-              VERIFICATION URL (since email couldn't be sent): 
-              ${process.env.FRONTEND_URL}/verify/${verificationToken}
-              ====================================================================
-            `);
-          }
+          console.error(
+            `Failed to send verification email to ${newUser.email}`
+          );
         });
-
-        // For testing: Log verification link (remove in production)
 
         res.status(201).json(
           formatSuccessResponse(
@@ -160,7 +151,7 @@ router.post(
           status: user.status,
         },
         process.env.JWT_SECRET,
-        { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+        { expiresIn: process.env.JWT_EXPIRES_IN }
       );
 
       res.json(
@@ -238,6 +229,59 @@ router.get("/verify/:token", async (req, res) => {
   }
 });
 
+router.post("/resend-verification", authRateLimit, async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json(formatErrorResponse("Email is required"));
+    }
+
+    // Find user by email
+    const userResult = await query(
+      "SELECT id, name, email, status FROM users WHERE email = $1",
+      [email.toLowerCase().trim()]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json(formatErrorResponse("User not found"));
+    }
+
+    const user = userResult.rows[0];
+
+    // Check if user is blocked
+    if (user.status === "blocked") {
+      return res
+        .status(403)
+        .json(formatErrorResponse("Account has been blocked"));
+    }
+
+    // Check if user is already verified
+    if (user.status !== "unverified") {
+      return res
+        .status(400)
+        .json(formatErrorResponse("Email is already verified"));
+    }
+
+    // Generate verification token and send email
+    const verificationToken = jwt.sign(
+      { userId: user.id, email: user.email, type: "verification" },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    // Send verification email
+    await sendVerificationEmail(user.email, user.name, verificationToken);
+
+    res.json(formatSuccessResponse("Verification email resent successfully"));
+  } catch (error) {
+    console.error("Resend verification failed:", error);
+    res
+      .status(500)
+      .json(formatErrorResponse("Failed to resend verification email"));
+  }
+});
+
 router.post("/refresh", async (req, res) => {
   try {
     const { token } = req.body;
@@ -284,7 +328,7 @@ router.post("/refresh", async (req, res) => {
         status: user.status,
       },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" }
+      { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
     res.json(

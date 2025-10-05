@@ -117,12 +117,17 @@ router.patch(
           .json(formatErrorResponse("User IDs array required"));
       }
 
+      // Update users to blocked status and save previous status in one query
       const result = await query(
-        `UPDATE users 
-             SET status = 'blocked'::user_status 
-             WHERE id = ANY($1::uuid[]) 
-             AND status IN ('active', 'unverified')
-             RETURNING id, name, email, status`,
+        `
+        UPDATE users
+        SET 
+          previous_status = status,
+          status = 'blocked'::user_status
+        WHERE id = ANY($1::uuid[])
+        AND status IN ('active', 'unverified')
+        RETURNING id, name, email, status, previous_status
+      `,
         [userIds]
       );
 
@@ -164,12 +169,21 @@ router.patch(
           .json(formatErrorResponse("User IDs array required"));
       }
 
+      // Update users by restoring their previous status from the permanent column
+      // If no previous status exists, default to 'active'
       const result = await query(
-        `UPDATE users 
-             SET status = 'active'::user_status 
-             WHERE id = ANY($1::uuid[]) 
-             AND status = 'blocked'
-             RETURNING id, name, email, status`,
+        `
+        UPDATE users
+        SET 
+          status = COALESCE(previous_status, 'active'::user_status),
+          previous_status = NULL
+        WHERE id = ANY($1::uuid[]) AND status = 'blocked'
+        RETURNING id, name, email, status,
+          CASE 
+            WHEN status = 'unverified' THEN true 
+            ELSE false 
+          END AS restored_to_unverified
+      `,
         [userIds]
       );
 
@@ -185,13 +199,23 @@ router.patch(
           );
       }
 
+      // Count how many users were restored to unverified status
+      const unverifiedCount = unblockedUsers.filter(
+        (u) => u.restored_to_unverified
+      ).length;
+      const messageDetails =
+        unverifiedCount > 0
+          ? ` (${unverifiedCount} restored to unverified status)`
+          : "";
+
       res.json(
         formatSuccessResponse(
-          `Successfully unblocked ${unblockedUsers.length} user(s)`,
+          `Successfully unblocked ${unblockedUsers.length} user(s)${messageDetails}`,
           { unblockedUsers }
         )
       );
     } catch (error) {
+      console.error("Unblock error:", error);
       res.status(500).json(formatErrorResponse("Failed to unblock users"));
     }
   }

@@ -8,17 +8,14 @@ dotenv.config();
 
 // Initialize express app
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 // Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:5173",
-      "https://nocillax-it-ums.vercel.app",
-    ],
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   })
 );
@@ -45,7 +42,7 @@ app.get("/check-env", (req, res) => {
       EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME ? "Set" : "Not set",
       EMAIL_FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS ? "Set" : "Not set",
       JWT_SECRET: process.env.JWT_SECRET ? "Set" : "Not set",
-      FRONTEND_URL: process.env.FRONTEND_URL || "Not set", // It's safe to show this one
+      FRONTEND_URL: process.env.FRONTEND_URL ? "Set" : "Not set",
     },
   });
 });

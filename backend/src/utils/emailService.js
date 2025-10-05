@@ -1,10 +1,7 @@
 require("dotenv").config();
 const Sib = require("sib-api-v3-sdk");
 
-/**
- * Create Brevo/Sendinblue email client
- * @returns {object} The Brevo/Sendinblue TransactionalEmailsApi client
- */
+// Create Brevo email client
 const createEmailClient = () => {
   const client = Sib.ApiClient.instance;
   const apiKey = client.authentications["api-key"];
@@ -12,19 +9,10 @@ const createEmailClient = () => {
   return new Sib.TransactionalEmailsApi();
 };
 
-/**
- * Send email verification email
- * Important: This function sends verification emails to new users
- * @param {string} email - Recipient email address
- * @param {string} name - Recipient name
- * @param {string} token - Verification token
- * @returns {Promise} Email sending result
- */
+// Send verification email
 const sendVerificationEmail = async (email, name, token) => {
   try {
-    // Verification URL
     const verificationUrl = `${process.env.FRONTEND_URL}/verify/${token}`;
-    console.log(`Verification URL will be: ${verificationUrl}`);
 
     // Email template
     const htmlContent = `
@@ -97,10 +85,7 @@ const sendVerificationEmail = async (email, name, token) => {
       The NX IT-UMS Team
       `;
 
-    console.log(`Creating Brevo email client...`);
     const emailClient = createEmailClient();
-
-    console.log(`Sending verification email to ${email}...`);
 
     const sender = {
       email: process.env.EMAIL_FROM_ADDRESS,
@@ -117,53 +102,23 @@ const sendVerificationEmail = async (email, name, token) => {
       htmlContent,
     });
 
-    console.log(`✅ Verification email sent to ${email}`);
+    console.log(`Verification email sent to ${email}`);
 
     return result;
   } catch (error) {
-    console.error(`❌ Error sending verification email:`, error);
-
-    // Special handling for Render deployment - log the verification URL
-    if (process.env.NODE_ENV === "production") {
-      console.log(
-        "Email failed but logging verification URL for production environment..."
-      );
-      // For now, let's just log the verification URL so it's visible in the logs
-      console.log(`
-        ====================================================================
-        VERIFICATION URL (since email couldn't be sent): 
-        ${process.env.FRONTEND_URL}/verify/${token}
-        ====================================================================
-      `);
-    }
-
+    console.error(`Failed to send verification email to ${email}`);
     throw error;
   }
 };
 
-/**
- * Send password reset email (for future implementation)
- * @param {string} email - Recipient email address
- * @param {string} name - Recipient name
- * @param {string} token - Reset token
- * @returns {Promise} Email sending result
- */
+// For future implementation
 const sendPasswordResetEmail = async (email, name, token) => {
-  // Implementation for password reset emails
-  // Note: This is prepared for future password reset functionality
-  console.log(
-    `Password reset email would be sent to ${email} with token ${token}`
-  );
+  console.log(`Password reset email would be sent to ${email}`);
 };
 
-/**
- * Test email configuration
- * Important: Use this function to verify email setup is working
- * @returns {Promise<boolean>} Whether email configuration is valid
- */
+// Test email configuration
 const testEmailConfig = async () => {
   try {
-    // Check if the API key is set
     if (!process.env.BREVO_API_KEY) {
       throw new Error("Brevo API key not configured");
     }
@@ -176,13 +131,10 @@ const testEmailConfig = async () => {
       throw new Error("Sender name not configured");
     }
 
-    // Try to initialize the client to validate API key
     createEmailClient();
-
-    console.log("✅ Brevo configuration is valid");
     return true;
   } catch (error) {
-    console.error("❌ Email configuration error:", error.message);
+    console.error(`Email configuration error: ${error.message}`);
     return false;
   }
 };

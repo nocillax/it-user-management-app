@@ -1,12 +1,10 @@
 import axios from "axios";
 
-// Use the API URL defined in Vite config, fallback to environment variable, then local dev URL
-const apiBaseURL =
-  __API_URL__ ||
-  import.meta.env.VITE_API_URL ||
-  "https://it-user-management-app.onrender.com/api/v1";
+// Use the API URL from environment variable
+const apiBaseURL = import.meta.env.VITE_API_URL;
 
-console.log("API Base URL:", apiBaseURL); // For debugging
+// Log the API URL for debugging
+console.log("API Base URL:", apiBaseURL);
 
 const api = axios.create({
   baseURL: apiBaseURL,
@@ -72,6 +70,11 @@ export const authAPI = {
 
   verifyEmail: async (token) => {
     const response = await api.get(`/auth/verify/${token}`);
+    return response.data;
+  },
+
+  resendVerification: async (email) => {
+    const response = await api.post("/auth/resend-verification", { email });
     return response.data;
   },
 

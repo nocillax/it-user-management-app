@@ -1,41 +1,22 @@
 # IT User Management System
 
-A full-stack user management application built with the PERN stack for managing user authentication, registration, and administrative tasks.
-
-## 🚀 Live Demo
-
-- **Frontend**: [Deploy on Vercel](https://vercel.com)
-- **Backend**: [Deploy on Render](https://render.com)
-
-## 📦 Quick Deploy Guide
-
-### Option 1: Render + Vercel (Recommended)
-
-1. **Backend on Render**: Deploy Node.js + PostgreSQL
-2. **Frontend on Vercel**: Deploy React app
-
-### Option 2: Alternative Free Hosts
-
-- **Railway** (Full-stack)
-- **Netlify** (Frontend) + **Render** (Backend)
-- **Heroku** (Full-stack - requires credit card)
-
-See deployment instructions below ⬇️
+A full-stack user management application built with the PERN stack (PostgreSQL, Express, React, Node.js) for managing user authentication, registration, and administrative tasks.
 
 ## Features
 
 - **User Authentication**: Registration, login, email verification, and JWT-based sessions
 - **User Management**: View, block, unblock, and delete users with bulk operations
 - **Admin Dashboard**: Professional interface with sortable tables, filtering, and search
-- **Email Verification**: Automated email verification system with SMTP integration
+- **Email Verification**: Automated email verification system with Brevo API integration
 - **Security**: Password hashing, JWT tokens, rate limiting, and input validation
 - **Responsive Design**: Modern UI with TailwindCSS that works on all devices
+- **User Status Persistence**: Remembers previous status when blocking/unblocking users
 
 ## Tech Stack
 
 ### Frontend
 
-- **React 19** - User interface library
+- **React** - User interface library
 - **Vite** - Build tool and development server
 - **React Router** - Client-side routing
 - **TailwindCSS** - Utility-first CSS framework
@@ -50,7 +31,7 @@ See deployment instructions below ⬇️
 - **PostgreSQL** - Relational database
 - **JWT** - JSON Web Token authentication
 - **bcrypt** - Password hashing
-- **Nodemailer** - Email service integration
+- **Brevo (SendInBlue)** - Email service integration
 - **CORS** - Cross-origin resource sharing
 
 ### Database
@@ -73,9 +54,12 @@ See deployment instructions below ⬇️
 │   │   ├── utils/
 │   │   │   ├── emailService.js   # Email sending service
 │   │   │   └── helpers.js        # Utility functions
+│   │   ├── migrations/
+│   │   │   └── add-previous-status.js  # User status migration
 │   │   └── server.js             # Express server setup
 │   ├── database/
 │   │   └── schema.sql            # Database schema
+│   ├── docs/                     # Project documentation
 │   └── package.json
 ├── frontend/
 │   ├── src/
@@ -129,7 +113,7 @@ cp .env.example .env
 # Update .env with your configuration:
 # - DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 # - JWT_SECRET (generate a secure random string)
-# - EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS
+# - BREVO_API_KEY, EMAIL_FROM_NAME, EMAIL_FROM_ADDRESS
 # - FRONTEND_URL (http://localhost:5173)
 
 # Start development server
@@ -157,37 +141,50 @@ npm run dev
 ### 5. Access Application
 
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:5000
+- Backend API: http://localhost:5000/api/v1
 
 ## Environment Variables
 
 ### Backend (.env)
 
 ```env
-# Database
+# Server Configuration
+NODE_ENV=development
+PORT=5000
+
+# Database Configuration
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=user_management
 DB_USER=your_db_user
 DB_PASSWORD=your_db_password
 
-# JWT
+# JWT Configuration
 JWT_SECRET=your_jwt_secret_key
+JWT_EXPIRES_IN=7d
 
-# Email (Gmail SMTP example)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
+# Security Configuration
+BCRYPT_ROUNDS=12
 
-# URLs
+# Frontend URL (for email verification links)
 FRONTEND_URL=http://localhost:5173
+
+# Email Configuration (Brevo)
+EMAIL_PROVIDER=brevo
+BREVO_API_KEY=your_brevo_api_key
+EMAIL_FROM_NAME=IT User Management
+EMAIL_FROM_ADDRESS=no-reply@example.com
 ```
 
 ### Frontend (.env)
 
 ```env
+# API Configuration
 VITE_API_URL=http://localhost:5000/api/v1
+
+# App Configuration
+VITE_APP_NAME="IT User Management System"
+VITE_APP_VERSION="1.0.0"
 ```
 
 ## API Endpoints
@@ -229,13 +226,12 @@ npm start
 - Update CORS origins for production domains
 - Use secure JWT secrets (32+ characters)
 - Configure production database
-- Set up proper email service (SendGrid, AWS SES, etc.)
 - Enable HTTPS
 - Set up proper logging
 
 ## 🚀 Deployment Guide
 
-### Method 1: Render + Vercel (Free)
+### Method 1: Render + Vercel (Recommended)
 
 #### Backend Deployment (Render)
 
@@ -249,10 +245,9 @@ npm start
    ```
    NODE_ENV=production
    JWT_SECRET=your-long-random-secret
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_PORT=587
-   EMAIL_USER=your-email@gmail.com
-   EMAIL_PASS=your-app-password
+   BREVO_API_KEY=your_brevo_api_key
+   EMAIL_FROM_NAME=IT User Management
+   EMAIL_FROM_ADDRESS=no-reply@example.com
    FRONTEND_URL=https://your-app.vercel.app
    ```
 5. **Add PostgreSQL Database**: Render → Create → PostgreSQL
@@ -275,22 +270,6 @@ npm start
 2. **Deploy from GitHub**: One-click deployment
 3. **Add PostgreSQL**: Railway → Add Service → PostgreSQL
 4. **Set Environment Variables**: Same as above
-
-### Method 3: Local with ngrok (Development)
-
-```bash
-# Install ngrok
-npm install -g ngrok
-
-# Start backend
-cd backend && npm run dev
-
-# In new terminal, expose backend
-ngrok http 5000
-
-# Start frontend with ngrok URL
-cd frontend && VITE_API_URL=https://abc123.ngrok.io/api/v1 npm run dev
-```
 
 ## 📋 Post-Deployment Checklist
 
