@@ -1,5 +1,5 @@
 // test-email-config.js
-// Script to test email service configuration and send test emails
+// Script to test Brevo email service configuration and send test emails
 const dotenv = require("dotenv");
 const path = require("path");
 const readline = require("readline");
@@ -10,12 +10,10 @@ const { v4: uuidv4 } = require("uuid");
 dotenv.config();
 
 // Set up sample environment variables for testing if not already set
-process.env.EMAIL_HOST = process.env.EMAIL_HOST || "smtp.gmail.com";
-process.env.EMAIL_PORT = process.env.EMAIL_PORT || "587";
-process.env.EMAIL_USER = process.env.EMAIL_USER || "your-email@gmail.com"; // Replace with your test email
-process.env.EMAIL_PASS = process.env.EMAIL_PASS || "your-app-password"; // Replace with your app password
-process.env.EMAIL_FROM =
-  process.env.EMAIL_FROM || '"NX IT-UMS" <your-email@gmail.com>'; // Replace with your email
+process.env.BREVO_API_KEY = process.env.BREVO_API_KEY || "your-brevo-api-key"; // Replace with your Brevo API key
+process.env.EMAIL_FROM_NAME = process.env.EMAIL_FROM_NAME || "NX IT-UMS";
+process.env.EMAIL_FROM_ADDRESS =
+  process.env.EMAIL_FROM_ADDRESS || "your-email@example.com"; // Replace with your sender email
 process.env.FRONTEND_URL =
   process.env.FRONTEND_URL || "https://your-frontend-app.vercel.app"; // Replace with your frontend URL
 process.env.JWT_SECRET =
@@ -55,11 +53,9 @@ async function testEmailSetup() {
     // Check required environment variables
     console.log("Checking environment variables:");
     const requiredEnvVars = [
-      "EMAIL_HOST",
-      "EMAIL_PORT",
-      "EMAIL_USER",
-      "EMAIL_PASS",
-      "EMAIL_FROM",
+      "BREVO_API_KEY",
+      "EMAIL_FROM_NAME",
+      "EMAIL_FROM_ADDRESS",
       "FRONTEND_URL",
     ];
 
@@ -134,17 +130,15 @@ EMAIL CONFIGURATION GUIDE FOR RENDER.COM
 To enable email verification in your application, you need to add these
 environment variables to your Render.com service:
 
-1. EMAIL_HOST = smtp.gmail.com        (or your SMTP server)
-2. EMAIL_PORT = 587                   (or your SMTP port)
-3. EMAIL_USER = your-email@gmail.com  (your email address)
-4. EMAIL_PASS = your-app-password     (your email app password)
-5. EMAIL_FROM = "App Name" <your-email@gmail.com>
-6. FRONTEND_URL = https://your-frontend-app.vercel.app
+1. BREVO_API_KEY = your-brevo-api-key  (from Brevo dashboard)
+2. EMAIL_FROM_NAME = "Your App Name"    (display name for emails)
+3. EMAIL_FROM_ADDRESS = email@yourdomain.com  (sender email)
+4. FRONTEND_URL = https://your-frontend-app.vercel.app
 
-For Gmail, you need to:
-- Enable 2-Step Verification
-- Create an App Password: Google Account → Security → App Passwords
-- Use that App Password as EMAIL_PASS
+For Brevo (Sendinblue), you need to:
+- Create a Brevo account at https://www.brevo.com/
+- Generate an API key from Settings → API Keys
+- Use that API key as BREVO_API_KEY
 
 ==================================================
 `);

@@ -41,11 +41,9 @@ app.get("/health", (req, res) => {
 app.get("/check-env", (req, res) => {
   res.json({
     env_vars_set: {
-      EMAIL_HOST: process.env.EMAIL_HOST ? "Set" : "Not set",
-      EMAIL_PORT: process.env.EMAIL_PORT ? "Set" : "Not set",
-      EMAIL_USER: process.env.EMAIL_USER ? "Set" : "Not set",
-      EMAIL_PASS: process.env.EMAIL_PASS ? "Set" : "Not set",
-      EMAIL_FROM: process.env.EMAIL_FROM ? "Set" : "Not set",
+      BREVO_API_KEY: process.env.BREVO_API_KEY ? "Set" : "Not set",
+      EMAIL_FROM_NAME: process.env.EMAIL_FROM_NAME ? "Set" : "Not set",
+      EMAIL_FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS ? "Set" : "Not set",
       JWT_SECRET: process.env.JWT_SECRET ? "Set" : "Not set",
       FRONTEND_URL: process.env.FRONTEND_URL || "Not set", // It's safe to show this one
     },
