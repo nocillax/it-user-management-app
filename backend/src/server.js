@@ -13,9 +13,16 @@ const PORT = process.env.PORT;
 // Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Normalize frontend URL by removing any trailing slash
+const normalizedFrontendUrl = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.replace(/\/$/, "")
+  : null;
+console.log(`🔒 CORS enabled for origin: ${normalizedFrontendUrl}`);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: normalizedFrontendUrl,
     credentials: true,
   })
 );
