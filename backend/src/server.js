@@ -14,20 +14,16 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Enhanced CORS configuration with more debugging
-const allowedOrigins = [
-  // Production origin (with and without trailing slash)
-  "https://nocillax-it-ums.vercel.app",
-  "https://nocillax-it-ums.vercel.app/",
-  // Development origins
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-];
+// Simple CORS configuration using only environment variables
+// Get FRONTEND_URL from environment and normalize it
+const frontendUrl = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.replace(/\/$/, "")
+  : null;
 
 // Print CORS configuration for debugging
 console.log("🔒 CORS Configuration:");
 console.log(`- FRONTEND_URL from env: ${process.env.FRONTEND_URL}`);
-console.log(`- Allowed origins: ${JSON.stringify(allowedOrigins)}`);
+console.log(`- Normalized frontend URL: ${frontendUrl}`);
 
 app.use(
   cors({
@@ -37,7 +33,11 @@ app.use(
 
       console.log(`🌐 Incoming request from origin: ${origin}`);
 
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      // Normalize incoming origin by removing trailing slash if present
+      const normalizedOrigin = origin.replace(/\/$/, "");
+
+      // Only allow the exact origin from environment variable
+      if (frontendUrl && normalizedOrigin === frontendUrl) {
         callback(null, true);
       } else {
         console.warn(`❌ Origin not allowed by CORS: ${origin}`);
@@ -84,13 +84,11 @@ app.get("/cors-test", (req, res) => {
     message: "CORS is properly configured!",
     request_origin: req.headers.origin || "No origin header",
     cors_config: {
-      allowed_origins: [
-        "https://nocillax-it-ums.vercel.app",
-        "https://nocillax-it-ums.vercel.app/",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-      ],
+      allowed_origin: frontendUrl,
       frontend_url_from_env: process.env.FRONTEND_URL,
+      normalized_origin: req.headers.origin
+        ? req.headers.origin.replace(/\/$/, "")
+        : null,
     },
   });
 });
