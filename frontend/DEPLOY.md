@@ -1,30 +1,44 @@
-# IT User Management Frontend - Vercel Deploy
+# IT User Management Frontend - Vercel Deployment
 
-## Auto-Deploy from Git
+## Quick Deployment Steps
 
-This frontend is configured for deployment on Vercel.com
+1. **Connect Repository**
 
-### Environment Variables (Set in Vercel Dashboard):
+   - Sign up/login to [Vercel](https://vercel.com)
+   - Import your GitHub repository
+   - Select "frontend" as the root directory
 
-```
-VITE_API_URL=https://your-backend-app.render.com/api/v1
-```
+2. **Configure Settings**
 
-### Build Settings:
+   - **Framework**: Vite
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+   - **Install Command**: `npm install`
 
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Install Command**: `npm install`
+3. **Environment Variables**
 
-### Deployment Steps:
+   - Set `VITE_API_URL` to your Render backend URL (e.g., `https://your-app.onrender.com/api/v1`)
 
-1. Push code to GitHub/GitLab
-2. Connect repository to Vercel
-3. Set environment variables
-4. Deploy automatically
+4. **Deploy**
+   - Click "Deploy"
+   - Vercel will automatically build and deploy your frontend
 
-### Notes:
+## Custom Domain Setup (Optional)
 
-- Vercel automatically detects Vite configuration
-- Environment variables must start with VITE\_ prefix
-- Update VITE_API_URL after backend is deployed
+1. Go to your project settings in Vercel
+2. Navigate to "Domains"
+3. Add your custom domain and follow the DNS configuration instructions
+
+## Automatic Deployments
+
+Vercel automatically deploys when you push to your repository. To disable:
+
+1. Go to project settings
+2. Navigate to "Git"
+3. Configure auto-deployment settings
+
+## Monitoring
+
+- Check your deployment logs in the Vercel dashboard
+- Monitor build and runtime errors
+- View analytics and performance metrics

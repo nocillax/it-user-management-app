@@ -140,10 +140,9 @@ router.post(
       // Generate JWT token in parallel with updating last login timestamp
       const [, token] = await Promise.all([
         // Update last login timestamp
-        query(
-          "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1",
-          [user.id]
-        ),
+        query("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1", [
+          user.id,
+        ]),
         // Generate JWT token
         new Promise((resolve) => {
           const token = jwt.sign(
@@ -156,7 +155,7 @@ router.post(
             { expiresIn: process.env.JWT_EXPIRES_IN }
           );
           resolve(token);
-        })
+        }),
       ]);
 
       res.json(

@@ -35,7 +35,7 @@ const Login = ({ onLoginSuccess }) => {
 
     setIsLoading(true);
     setMessage({ type: "", text: "" });
-    
+
     // Set a timeout to show a message if login takes too long
     const slowLoginTimer = setTimeout(() => {
       setMessage({
@@ -56,7 +56,7 @@ const Login = ({ onLoginSuccess }) => {
 
       // First, ping the server to wake it up if it's sleeping
       try {
-        await fetch(`${import.meta.env.VITE_API_URL}/ping`, { method: 'GET' });
+        await fetch(`${import.meta.env.VITE_API_URL}/ping`, { method: "GET" });
       } catch (e) {
         // Ignore errors from ping, it's just to wake up the server
       }

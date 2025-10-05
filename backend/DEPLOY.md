@@ -1,31 +1,52 @@
-# IT User Management Backend - Render Deploy
+# IT User Management Backend - Render Deployment
 
-## Auto-Deploy from Git
+## Quick Deployment Steps
 
-This backend is configured for deployment on Render.com
+1. **Create Web Service**
 
-### Environment Variables (Set in Render Dashboard):
+   - Sign up/login to [Render](https://render.com)
+   - Click "New" → "Web Service"
+   - Connect your GitHub repository
 
-```
-NODE_ENV=production
-DATABASE_URL=postgresql://username:password@host:port/database
-JWT_SECRET=your-super-long-random-jwt-secret
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
-FRONTEND_URL=https://your-frontend-app.vercel.app
-PORT=10000
-```
+2. **Configure Settings**
 
-### Database Setup:
+   - **Name**: Choose a name for your service
+   - **Environment**: Node
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Root Directory**: If using monorepo, set to `/backend`
 
-1. Render will provide PostgreSQL database URL
-2. Update DATABASE_URL in environment variables
-3. Database schema will auto-create on first run
+3. **Environment Variables**
 
-### Build Command: `npm install`
+   - `NODE_ENV=production`
+   - `JWT_SECRET` (generate a secure random string)
+   - `BREVO_API_KEY` (from your Brevo account)
+   - `EMAIL_FROM_NAME` (display name for emails)
+   - `EMAIL_FROM_ADDRESS` (sender email address)
+   - `FRONTEND_URL` (your Vercel frontend URL)
+   - `PORT=10000`
 
-### Start Command: `npm start`
+4. **Database Setup**
 
-### Health Check Endpoint: `/api/v1/health`
+   - Create a PostgreSQL database in Render
+   - Render will automatically add the `DATABASE_URL` to your service
+   - Run the schema.sql in the PostgreSQL instance (via Render database shell)
+
+5. **Deploy**
+   - Click "Create Web Service"
+   - Wait for the deployment to complete
+
+## Health Check
+
+Use the `/health` endpoint to verify your deployment is working correctly.
+
+## Scaling (Optional)
+
+1. Adjust the instance type in the settings
+2. Enable auto-scaling for production workloads
+
+## Monitoring
+
+- View server logs in the Render dashboard
+- Monitor performance metrics
+- Set up alerts for critical errors

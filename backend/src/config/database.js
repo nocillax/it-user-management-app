@@ -26,8 +26,8 @@ pool.idleTimeoutMillis = 60000; // Longer idle timeout (1 minute)
 pool.connectionTimeoutMillis = 5000; // Longer connection timeout (5 seconds)
 
 // Track pool errors to improve diagnostics
-pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
+pool.on("error", (err) => {
+  console.error("Unexpected error on idle client", err);
 });
 
 // Keep at least one connection warm to reduce cold start times
@@ -40,9 +40,9 @@ const keepConnectionWarm = async () => {
     }
     // Get a new connection
     warmConnection = await pool.connect();
-    console.log('Keeping database connection warm');
+    console.log("Keeping database connection warm");
   } catch (error) {
-    console.error('Failed to keep connection warm:', error);
+    console.error("Failed to keep connection warm:", error);
   }
 };
 
