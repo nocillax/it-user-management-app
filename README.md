@@ -281,6 +281,33 @@ npm start
 - [ ] User management features
 - [ ] Database operations work
 
+## 🔧 Troubleshooting
+
+### CORS Issues
+
+If you're experiencing CORS errors like:
+
+```
+Access to XMLHttpRequest has been blocked by CORS policy
+```
+
+Try these solutions:
+
+1. **Check CORS configuration**:
+
+   - Ensure `FRONTEND_URL` in backend environment matches your frontend domain exactly
+   - Use the `/cors-test` endpoint to debug CORS settings
+
+2. **Common CORS issues**:
+
+   - Trailing slashes: Ensure consistency (use `https://domain.com` without trailing slash)
+   - HTTP vs HTTPS: Make sure protocols match
+   - Subdomain issues: `www.domain.com` is different from `domain.com`
+
+3. **Testing tool**:
+   - Use the `cors-test.html` file in the backend directory to diagnose issues
+   - Open it in a browser and test various endpoints
+
 ## License
 
 MIT License - see LICENSE file for details

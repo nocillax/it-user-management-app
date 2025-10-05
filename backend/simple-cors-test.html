@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple CORS Test</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      button {
+        padding: 10px 15px;
+        background: #4a56e2;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+      input {
+        padding: 8px;
+        width: 100%;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+      pre {
+        background: #f1f1f1;
+        padding: 10px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+      .success {
+        color: #2e7d32;
+        background: #e8f5e9;
+        padding: 10px;
+        border-radius: 4px;
+        border-left: 4px solid #2e7d32;
+      }
+      .error {
+        color: #c62828;
+        background: #ffebee;
+        padding: 10px;
+        border-radius: 4px;
+        border-left: 4px solid #c62828;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>CORS Test Tool</h1>
+    <p>This simple tool tests CORS configurations with various endpoints</p>
+
+    <div>
+      <h3>1. Local Standalone Test Server</h3>
+      <button onclick="testEndpoint('http://localhost:9000/test')">
+        Test Standalone Server (GET)
+      </button>
+      <button
+        onclick="testEndpoint('http://localhost:9000/test', 'POST', {test: 'data'})"
+      >
+        Test Standalone Server (POST)
+      </button>
+    </div>
+
+    <div>
+      <h3>2. Local Full Backend</h3>
+      <button onclick="testEndpoint('http://localhost:5000/cors-test')">
+        Test Local Backend CORS
+      </button>
+      <button onclick="testEndpoint('http://localhost:5000/health')">
+        Test Local Backend Health
+      </button>
+    </div>
+
+    <div>
+      <h3>3. Production Backend</h3>
+      <input
+        type="text"
+        id="backendUrl"
+        value="https://it-user-management-app.onrender.com"
+        placeholder="Backend URL"
+      />
+      <div>
+        <button onclick="testProductionEndpoint('/cors-test')">
+          Test CORS Endpoint
+        </button>
+        <button onclick="testProductionEndpoint('/health')">Test Health</button>
+        <button
+          onclick="testProductionEndpoint('/api/v1/auth/login', 'POST', {email: 'test@example.com', password: 'test123'})"
+        >
+          Test Login
+        </button>
+      </div>
+    </div>
+
+    <h3>Results:</h3>
+    <div id="result">
+      <pre>Results will appear here...</pre>
+    </div>
+
+    <script>
+      // Function to test an endpoint
+      async function testEndpoint(url, method = "GET", body = null) {
+        const resultElement = document.getElementById("result");
+        resultElement.innerHTML = `<pre>Testing ${method} ${url}...</pre>`;
+
+        try {
+          const options = {
+            method,
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          };
+
+          if (body) {
+            options.body = JSON.stringify(body);
+          }
+
+          const startTime = Date.now();
+          const response = await fetch(url, options);
+          const endTime = Date.now();
+
+          let responseData;
+          try {
+            responseData = await response.json();
+          } catch (e) {
+            responseData = { error: "Could not parse JSON response" };
+          }
+
+          const corsHeaders = {
+            "access-control-allow-origin": response.headers.get(
+              "access-control-allow-origin"
+            ),
+            "access-control-allow-credentials": response.headers.get(
+              "access-control-allow-credentials"
+            ),
+            "access-control-allow-methods": response.headers.get(
+              "access-control-allow-methods"
+            ),
+            "access-control-allow-headers": response.headers.get(
+              "access-control-allow-headers"
+            ),
+          };
+
+          resultElement.innerHTML = `
+          <div class="success">
+            ✅ Success! Response received in ${endTime - startTime}ms
+          </div>
+          <h4>Response:</h4>
+          <pre>${JSON.stringify(responseData, null, 2)}</pre>
+          <h4>CORS Headers:</h4>
+          <pre>${JSON.stringify(corsHeaders, null, 2)}</pre>
+        `;
+        } catch (error) {
+          resultElement.innerHTML = `
+          <div class="error">
+            ❌ Error: ${error.message}
+          </div>
+          <pre>
+This could be a CORS error. Common causes:
+
+1. The server isn't running or isn't accessible
+2. CORS is not configured properly on the server
+3. Network issue or firewall blocking the request
+
+Browser Details:
+- The browser will not show response headers for failed CORS requests
+- Check your browser's developer console (F12) for more details
+          </pre>
+        `;
+        }
+      }
+
+      // Function to test production endpoint
+      function testProductionEndpoint(path, method = "GET", body = null) {
+        const backendUrl = document.getElementById("backendUrl").value;
+        testEndpoint(`${backendUrl}${path}`, method, body);
+      }
+    </script>
+  </body>
+</html>

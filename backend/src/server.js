@@ -14,36 +14,39 @@ const PORT = process.env.PORT;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// More flexible CORS configuration to handle production vs development
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-console.log(`🔒 CORS configured with frontend URL: ${frontendUrl}`);
+// Enhanced CORS configuration with more debugging
+const allowedOrigins = [
+  // Production origin (with and without trailing slash)
+  "https://nocillax-it-ums.vercel.app",
+  "https://nocillax-it-ums.vercel.app/",
+  // Development origins
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
+
+// Print CORS configuration for debugging
+console.log("🔒 CORS Configuration:");
+console.log(`- FRONTEND_URL from env: ${process.env.FRONTEND_URL}`);
+console.log(`- Allowed origins: ${JSON.stringify(allowedOrigins)}`);
 
 app.use(
   cors({
-    origin: function(origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl requests)
       if (!origin) return callback(null, true);
-      
-      // Check if origin matches our frontend URL (with or without trailing slash)
-      const vercelOrigin = 'https://nocillax-it-ums.vercel.app';
-      const allowedOrigins = [
-        frontendUrl,
-        frontendUrl + '/',
-        vercelOrigin,
-        vercelOrigin + '/',
-        'http://localhost:5173'
-      ];
-      
-      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+
+      console.log(`🌐 Incoming request from origin: ${origin}`);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        console.log(`❌ CORS blocked origin: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        console.warn(`❌ Origin not allowed by CORS: ${origin}`);
+        callback(null, false);
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -70,6 +73,24 @@ app.get("/check-env", (req, res) => {
       EMAIL_FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS ? "Set" : "Not set",
       JWT_SECRET: process.env.JWT_SECRET ? "Set" : "Not set",
       FRONTEND_URL: process.env.FRONTEND_URL ? "Set" : "Not set",
+    },
+  });
+});
+
+// CORS test endpoint
+app.get("/cors-test", (req, res) => {
+  res.json({
+    success: true,
+    message: "CORS is properly configured!",
+    request_origin: req.headers.origin || "No origin header",
+    cors_config: {
+      allowed_origins: [
+        "https://nocillax-it-ums.vercel.app",
+        "https://nocillax-it-ums.vercel.app/",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+      ],
+      frontend_url_from_env: process.env.FRONTEND_URL,
     },
   });
 });
